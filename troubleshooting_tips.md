@@ -1,120 +1,113 @@
-# Troubleshooting Tips (Engineering Playbook)
+# Troubleshooting Tips
 
-A growing collection of short, reusable troubleshooting rules for DevOps, CI/CD, backend, and deployment issues.
-
-## How to use this file
-- Search (Ctrl+F) for keywords: **Expected**, **Render**, **CodeQL**, **Dependency Review**, **SQLAlchemy**, **Docker**, etc.
-- Copy the **Rule** block and apply the checklist.
-- After every incident, add a new entry using the template below.
+This file is meant to grow over time. Each entry is one “playbook card” you can reuse.
 
 ---
 
-## Table of Contents
-> Add a new bullet for each rule you add.
-- [TR-001 — “Expected” required check = enforcement/config mismatch](#tr-001--expected-required-check--enforcementconfig-mismatch)
-- [TR-002 — Render deploy fails with missing DB driver (psycopg2)](#tr-002--render-deploy-fails-with-missing-db-driver-psycopg2)
+## Tip format (copy/paste)
+
+### [TIP-ID] Short title
+**Tags:** tag1, tag2, tag3
+
+**Symptoms**
+- What you see (UI text, error message, logs)
+
+**Scope**
+- Where it happens (local, CI, deploy, prod)
+- What changed right before it happened
+
+**Fast triage (5 minutes)**
+1) Quick check #1
+2) Quick check #2
+3) Quick check #3
+
+**Root causes (most common)**
+- Cause A
+- Cause B
+
+**Fix**
+- Step-by-step, minimal-risk steps
+
+**Prevention**
+- Guardrails (tests, checks, naming conventions, automation)
+
+**Notes / links**
+- (Optional) Relevant links, commands, or internal notes
 
 ---
 
-## Entry Template (copy/paste for new tips)
+## CI / CD
 
-### TR-XXX — <Short title>
-**Category:** CI/CD | Deploy | Backend | DB | Security | Tooling  
-**Severity:** Low | Medium | High  
-**Trigger (symptoms):**
-- <what you see in UI/logs>
+### [CI-001] Required check stuck on “Expected — Waiting for status to be reported”
+**Tags:** github-actions, branch-protection, status-checks, cicd
 
-**Most likely cause:**
-- <one sentence root cause>
+**Symptoms**
+- PR shows a required check as **Expected** (not running)  
+  Example: `CI / gate — Expected — Waiting for status to be reported`
+- You can see other checks are green, but merge is blocked.
 
-**Fast confirmation (2–5 min):**
-1) <check 1>
-2) <check 2>
+**Scope**
+- GitHub branch protection / rulesets + GitHub Actions.
 
-**Fix (do in order):**
-1) <fix 1>
-2) <fix 2>
+**Fast triage (5 minutes)**
+1) Open the PR → **Checks** tab → copy the *exact* names of the checks that actually ran  
+   Example: `CI / tests (pull_request)`, `CI / gate (pull_request)`
+2) Go to repo → **Settings → Rules → Rulesets / Branch protection**  
+   Compare required checks vs actual check names **character-for-character**.
+3) Confirm the workflow is configured to run for the same event as the PR (`pull_request`).
 
-**Prevention (next time):**
-- <guardrail or standard>
+**Root causes (most common)**
+- Branch protection requires a check name that **no longer exists** (renamed job/workflow, deleted workflow, changed event).
+- You required an “aggregator” check (like `gate`) but the actual check run name is different (e.g., includes `(pull_request)`).
+- You enabled Code Scanning “default setup” and it created a separate neutral check (`Code scanning results / CodeQL`) that doesn’t match your workflow.
 
-**Notes:**
-- <links, gotchas, exact strings, etc.>
+**Fix**
+1) Update required checks to match the *actual* check run names in the PR.
+2) Prefer requiring the real checks directly (tests / CodeQL / dependency review) instead of a `gate` aggregator.
+3) If you keep `gate`, make its name stable:
+   - set `name:` at workflow + job level explicitly
+   - avoid multiple workflows producing similarly named checks
 
----
-
-## TR-001 — “Expected” required check = enforcement/config mismatch
-
-**Category:** CI/CD  
-**Severity:** High (blocks merges)  
-
-**Trigger (symptoms):**
-- PR shows a required check as:
-  - **Expected**
-  - **Waiting for status to be reported**
-  - **Missing / not found**
-- Other CI jobs may be green, but merge is blocked.
-
-**Most likely cause:**
-- GitHub is enforcing a **status-check context name** that is **not being reported** for the PR head/merge commit (ruleset/branch protection/code scanning drift).
-
-**Fast confirmation (2–5 min):**
-1) Copy the exact label of the “Expected” check (case + spacing matters).
-2) Compare it to the actual check-run names shown in the PR.
-3) Inventory enforcement sources:
-   - Settings → **Rules → Rulesets**
-   - Settings → **Branches** (legacy protection rules)
-   - Security → **Code scanning** (repo-level checks)
-
-**Fix (do in order):**
-1) Temporarily disable enforcement (ruleset) to unblock iteration.
-2) Make required checks match the **exact** check names being reported.
-3) Remove/disable any stale legacy branch protection rules if using rulesets.
-4) If “Add checks” dropdown is empty, run the workflow on **main** (or target branch) so contexts exist and can be selected.
-5) Re-run checks on the latest commit (or push an empty commit) to ensure the correct context is posted.
-
-**Prevention (next time):**
-- Treat **Expected** as configuration mismatch, not a slow CI run.
-- Prefer one enforcement system (rulesets OR legacy branch protection), not both.
-- Avoid adding an “aggregator” gate job until underlying checks are stable.
-
-**Notes:**
-- If “Require branches to be up to date” is ON, checks must run on the **merge commit**.
-- Optional/neutral checks should not be required unless intentionally enforced.
+**Prevention**
+- Treat check names as an API: rename deliberately and update branch protection in the same PR.
+- Keep workflows separated and clearly named:
+  - `CI / tests`
+  - `CodeQL / analyze (python)`
+  - `Dependency Review / dependency-review`
+- Add a short “CI contract” note in the repo (README) listing required checks.
 
 ---
 
-## TR-002 — Render deploy fails with missing DB driver (psycopg2)
+## Deploy
 
-**Category:** Deploy | DB  
-**Severity:** High (app won’t boot)  
+### [DEPLOY-001] Render deploy fails with “ModuleNotFoundError: No module named 'psycopg2'”
+**Tags:** render, flask, sqlalchemy, postgres, gunicorn
 
-**Trigger (symptoms):**
-- Render deploy fails during `gunicorn wsgi:app` with:
-  - `ModuleNotFoundError: No module named 'psycopg2'`
+**Symptoms**
+- Render build succeeds, but deploy crashes on startup
+- Error mentions: `ModuleNotFoundError: No module named 'psycopg2'`
 
-**Most likely cause:**
-- SQLAlchemy is using the `postgresql+psycopg2` dialect because the DB URL does not specify a driver, while the project installed **psycopg v3** (`psycopg[binary]`) instead of psycopg2.
+**Scope**
+- App uses SQLAlchemy + Postgres, but the Postgres driver is missing/mismatched.
 
-**Fast confirmation (2–5 min):**
-1) Check Render logs: confirm it crashes while importing the DB driver.
-2) Check `requirements.txt`: verify you have `psycopg[binary]` and not `psycopg2`.
+**Fast triage (5 minutes)**
+1) Confirm what driver SQLAlchemy is trying to load (error stack shows `dialects/postgresql/psycopg2.py` vs `psycopg.py`)
+2) Check `requirements.txt`:
+   - `psycopg[binary]` for psycopg v3, OR
+   - `psycopg2-binary` for psycopg2
 3) Check `DATABASE_URL` scheme:
-   - Render often provides `postgres://...` or `postgresql://...`
-   - SQLAlchemy may default to psycopg2 unless driver is explicit.
+   - `postgresql://...` defaults to psycopg2 in many setups
+   - `postgresql+psycopg://...` forces psycopg v3
 
-**Fix (do in order):**
-1) Normalize `DATABASE_URL` in code:
-   - `postgres://...` → `postgresql://...`
-   - `postgresql://...` → `postgresql+psycopg://...`
-2) Redeploy.
+**Fix**
+- If using psycopg v3:
+  1) Add `psycopg[binary]` to `requirements.txt`
+  2) Normalize `DATABASE_URL` in code so it uses `postgresql+psycopg://...`
 
-**Prevention (next time):**
-- Always force the SQLAlchemy driver explicitly for Postgres:
-  - psycopg v3: `postgresql+psycopg://...`
-- Add a small helper in `create_app()` that normalizes Render-provided URLs.
+- If using psycopg2:
+  1) Add `psycopg2-binary` to `requirements.txt`
+  2) Keep `postgresql://...`
 
-**Notes:**
-- Alternative fix: change Render env var to use `postgresql+psycopg://...` directly (Render dashboard → Environment).
-
----
+**Prevention**
+- Add a minimal startup test in CI that imports the WSGI app (`python -c "import wsgi; print('ok')"`)
+- Document DB driver expectations in README.
