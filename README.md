@@ -30,17 +30,11 @@
 
 ---
 
-## 📊 GitHub Stats (the fun stuff 😄)
+## 📊 GitHub Stats (the cool stuff)
 
 ### ⭐ Overview
 ![GitHub Stats](https://github-readme-stats.vercel.app/api?username=RealTimGFM&show_icons=true&theme=tokyonight&hide_border=true)
 ![Top Languages](https://github-readme-stats.vercel.app/api/top-langs/?username=RealTimGFM&layout=compact&theme=tokyonight&hide_border=true)
-
-### 🔥 Streak
-![GitHub Streak](https://streak-stats.demolab.com?user=RealTimGFM&theme=tokyonight&hide_border=true)
-
-### 🏆 Trophies
-![Trophies](https://github-profile-trophy.vercel.app/?username=RealTimGFM&theme=tokyonight&no-frame=true&row=1&column=7)
 
 ### 📈 Activity Graph
 ![Activity Graph](https://github-readme-activity-graph.vercel.app/graph?username=RealTimGFM&theme=tokyo-night&hide_border=true)
