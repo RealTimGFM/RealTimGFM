@@ -33,7 +33,7 @@
 ## 📊 GitHub Stats (the cool stuff)
 
 ### ⭐ Overview
-![GitHub Stats](https://github-readme-stats-fast.vercel.app/api?username=RealTimGFM&show_icons=true&theme=tokyonight&hide_border=true&include_all_commits=true&rank_icon=github&show=reviews,discussions_started,discussions_answered,prs_merged,prs_merged_percentage)
+![GitHub Stats](https://github-readme-stats-fast.vercel.app/api?username=RealTimGFM&show_icons=true&theme=tokyonight&hide_border=true&include_all_commits=true&rank_icon=github&show=reviews,prs_merged,prs_merged_percentage)
 ![Top Languages](https://github-readme-stats-fast.vercel.app/api/top-langs/?username=RealTimGFM&layout=compact&theme=tokyonight&hide_border=true&langs_count=8)
 
 ### 📈 Activity Graph
