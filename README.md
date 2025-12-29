@@ -33,8 +33,8 @@
 ## 📊 GitHub Stats (the cool stuff)
 
 ### ⭐ Overview
-![GitHub Stats]([https://github-readme-stats.vercel.app/api?username=RealTimGFM&show_icons=true&theme=tokyonight&hide_border=true](https://github.com/pranesh-2005/github-readme-stats-fast))
-![Top Languages]([https://github-readme-stats.vercel.app/api/top-langs/?username=RealTimGFM&layout=compact&theme=tokyonight&hide_border=true](https://github-readme-stats-fast.vercel.app/api/top-langs/?username=RealTimGFM&layout=compact&theme=tokyonight&hide_border=true&langs_count=8))
+![GitHub Stats](https://github-readme-stats-fast.vercel.app/api?username=RealTimGFM&show_icons=true&theme=tokyonight&hide_border=true&include_all_commits=true&rank_icon=github&show=reviews,discussions_started,discussions_answered,prs_merged,prs_merged_percentage)
+![Top Languages](https://github-readme-stats-fast.vercel.app/api/top-langs/?username=RealTimGFM&layout=compact&theme=tokyonight&hide_border=true&langs_count=8)
 
 ### 📈 Activity Graph
 ![Activity Graph](https://github-readme-activity-graph.vercel.app/graph?username=RealTimGFM&theme=tokyo-night&hide_border=true)
